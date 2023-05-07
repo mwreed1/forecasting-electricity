@@ -1,0 +1,93 @@
+---
+title: "MT_196 analysis"
+author: "Margaret Reed"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+
+```{r load-pkgs}
+library(tidyverse)
+library(lubridate)
+library(prophet)
+library(MLmetrics)
+library(scales)
+```
+
+```{r load-script}
+source("make-model.R")
+```
+
+```{r load-data}
+data <- get_account("MT_196")
+```
+
+```{r plot-data}
+data %>%
+   ggplot(aes(x = ds, y = y)) +
+   geom_line() +
+  theme_minimal()
+```
+
+There appears to be an outlier so I looked at the end of the data
+
+```{r clean-data}
+data <- data %>% slice(1: nrow(data) - 1)
+```
+
+```{r split-data}
+train <- split_data(data)$train
+validation <- split_data(data)$validation
+test <- split_data(data)$test
+```
+
+```{r make-model}
+m <- prophet(rbind(train, validation))
+future <- make_future_dataframe(m, periods = nrow(test), freq = "week")
+forecast <- predict(m, future)
+```
+
+```{r plot-forecast}
+full_join(data, forecast) %>%
+  ggplot() +
+  geom_line(aes(x = ymd(ds), y = y), color = "black") +
+  geom_line(aes(x = ymd(ds), y = yhat), color = "blue") +
+  theme_minimal() +
+  geom_line(data = data%>%slice_head(n=nrow(train)), aes(x = ymd(ds), y = y), color = "grey") +
+  scale_y_continuous(labels = label_number(scale = 0.000001, suffix = "M")) +
+  labs(
+    x = "Date",
+    y = "Electricity usage",
+    title = "Electricity usage model for account MT_196"
+  )
+```
+
+
+```{r find-mape}
+find_mape(forecast, test)$total
+find_mape(forecast, test)$first
+find_mape(forecast, test)$second
+find_mape(forecast, test)$third
+```
+
+
+```{r split-mape}
+split_mape(forecast, test )%>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "segment",
+    values_to = "error"
+  ) %>%
+  ggplot(aes(x = error, y = segment)) +
+  geom_boxplot() +
+  labs(
+    x = "Error (MAPE)",
+    y = "Third of testing data",
+    title = "Boxplots of errors"
+  ) +
+  theme_minimal()
+```
+

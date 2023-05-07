@@ -2,7 +2,7 @@
 title: "EDA"
 author: "Margaret Reed"
 date: "`r Sys.Date()`"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -14,12 +14,13 @@ library(tidyverse)
 library(lubridate)
 library(prophet)
 library(MLmetrics)
+library(scales)
 ```
-
 
 ```{r load-data}
 data <- read_csv("../raw_data/weekly_usage.csv")
 ```
+
 ## Exploratory data analysis
 
 ### data cleaning
@@ -145,7 +146,13 @@ full_join(MT_362, forecast) %>%
   geom_line(aes(x = ymd(ds), y = y), color = "black") +
   geom_line(aes(x = ymd(ds), y = yhat), color = "blue") +
   theme_minimal() +
-  geom_line(data = MT_362%>%slice_head(n=N_train), aes(x = ymd(ds), y = y), color = "grey")
+  geom_line(data = MT_362%>%slice_head(n=N_train), aes(x = ymd(ds), y = y), color = "grey") +
+  scale_y_continuous(labels = label_number(scale = 0.000001, suffix = "M")) +
+  labs(
+    x = "Date",
+    y = "Electricity usage",
+    title = "Electricity usage model for account MT_362"
+  )
 ```
 ```{r}
 s <- round(N_test/3, 0)
