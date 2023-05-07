@@ -43,8 +43,13 @@ First I plotted the data as it was.
 ```{r plot-data}
 data %>%
    ggplot(aes(x = date, y = value)) +
-   geom_point() +
-  theme_minimal()
+   geom_point(size = 0.5) +
+  theme_minimal() +
+  scale_y_continuous(labels = label_number(scale = 0.000001, suffix = "M")) +
+  labs(
+    x = "Date",
+    y = "Electricity usage"
+  )
 ```
 
 
@@ -70,7 +75,13 @@ data %>%
   ) %>%
    ggplot(aes(x = date, y = value, color = account)) +
    geom_line() +
-  theme_minimal()
+  theme_minimal() +
+  scale_y_continuous(labels = label_number(scale = 0.000001, suffix = "M")) +
+  labs(
+    x = "Date",
+    y = "Electricity usage",
+    title = "Electricity usage of top 5 accounts by consumption"
+  )
 ```
 
 
@@ -177,6 +188,7 @@ third = map2_dbl(pred_test[(2*s+1):(3*s)], true_test[(2*s+1):(3*s)], MAPE)
   ) %>%
   ggplot(aes(x = error, y = segment)) +
   geom_boxplot() +
+  scale_x_continuous(label = label_percent()) +
   labs(
     x = "Error (MAPE)",
     y = "Third of testing data",

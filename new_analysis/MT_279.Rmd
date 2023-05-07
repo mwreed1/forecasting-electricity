@@ -1,5 +1,5 @@
 ---
-title: "MT_196 analysis"
+title: "MT_279 analysis"
 author: "Margaret Reed"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -22,7 +22,7 @@ source("make-model.R")
 ```
 
 ```{r load-data}
-data <- get_account("MT_196")
+data <- get_account("MT_279")
 ```
 
 ```{r plot-data}
@@ -61,7 +61,7 @@ full_join(data, forecast) %>%
   labs(
     x = "Date",
     y = "Electricity usage",
-    title = "Electricity usage model for account MT_196"
+    title = "Electricity usage model for account MT_279"
   )
 ```
 
